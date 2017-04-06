@@ -5,20 +5,25 @@ import requests
 import codecs
 import os
 import sys
+import time
+from datetime import date
 
 src_url = 'http://www.1point3acres.com/bbs/forum.php?mod=forumdisplay&fid=198&filter=author&orderby=dateline&sortid=192'
-log_home = '~/1point3/'
+log_home = os.path.expanduser('~/1point3')
 keyword = '我这里要招人'
 
-def fetch(code='utf-8', url = src_url):
-    r = requests.get(url)
-    return r.text.encode(code)
+def catch(url = src_url, pth = log_home):
+    fname = date.today().strftime('%y-%m-%d') + '.html'
+    fpth = os.path.join(pth, fname)
+    if not os.path.exists(fpth):
+        r = requests.get(url)
+        if r.status_code != 200:
+            sys.exit("Error: failed to download page, error status "+ r.status_code)
+        f = codecs.open(fpth, 'w+', 'UTF-8')
+        f.write(r.text)
+    return fpth
 
-def save(pth = log_home + 'tmp.html'):
-    f = codecs.open(pth, 'w+', 'UTF-8')
-    f.write(get())
-
-def flite(key=keyword, src=log_home + 'tmp.html'):
+def flite(src=log_home + '/tmp.html', key = keyword):
     rst = []
     with codecs.open(src, 'r','UTF-8') as f:
         for line in f:
@@ -42,17 +47,11 @@ def parse(text):
     title = arr[1][1:-5]
     return {'url':url, 'title':title}
 
-def init():
+def main():
     if not os.path.exists(log_home):
         os.mkdir(log_home)
-
-def main():
-    init()
-    page = fetch()
-    if page == None:
-         sys.exit('Error: failed to download html.')   
-    #TODO: save page with date as name
-    flited = flite() 
+    fpth = catch() 
+    flited = flite(fpth) 
     for text in flited:
         parsed =  parse(text)
         if parsed != None:

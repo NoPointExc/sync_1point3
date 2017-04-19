@@ -7,9 +7,10 @@ import os
 import sys
 import time
 from datetime import date
+import config
 
-src_url = 'http://www.1point3acres.com/bbs/forum.php?mod=forumdisplay&fid=198&filter=author&orderby=dateline&sortid=192'
-log_home = os.path.expanduser('~/1point3')
+src_url = config.src_url
+log_home = config.log_home
 keyword = '我这里要招人'
 
 def catch(url = src_url, pth = log_home):
